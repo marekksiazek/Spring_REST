@@ -1,8 +1,9 @@
 package pl.marekksiazek.rest.restCont;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import jakarta.annotation.PostConstruct;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import pl.marekksiazek.rest.entity.Student;
 
 import java.util.ArrayList;
@@ -12,20 +13,39 @@ import java.util.List;
 @RequestMapping("/api")
 public class StudentRestController {
 
-    // define endpoint for "/students" - return students list
+    private List<Student> theStudents;
 
-    @GetMapping("/students")
-    public List<Student> getStudents() {
+    @PostConstruct
+    public void loadData() {
 
-        List<Student> theStudents = new ArrayList<>();
+        theStudents = new ArrayList<>();
 
         theStudents.add(new Student("Marek", "Książek"));
         theStudents.add(new Student("Łukasz", "Szyba"));
         theStudents.add(new Student("Paweł", "Bartoszewski"));
+    }
 
+    // define endpoint for "/students" - return students list
 
+    @GetMapping("/students")
+    public List<Student> getStudents() {
         return theStudents;
     }
+
+    // define endpoint dor "/students/{studentID}" - return student with given id
+
+    @GetMapping("/students/{studentId}")
+    public Student getStudent(@PathVariable int studentId){
+
+        // check the studentId again list size
+        if ((studentId >= theStudents.size()) || (studentId < 0)){
+            throw new StudentNotFoundException("Student id not found - " + studentId);
+        }
+
+        return theStudents.get(studentId);
+    }
+
+    // Add an exception handler using @ExceptionHandler
 
 
 }
